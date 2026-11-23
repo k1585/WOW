@@ -1,3 +1,4 @@
+
 <!doctype html>
 <html lang="ko">
 <head>
@@ -13,10 +14,11 @@ p{font-size:14px;line-height:1.65;color:#555;margin:0 0 12px}
 hr{border:0;border-top:1px solid #ddd;margin:25px 0 14px}
 small{font-size:12px;color:#888}
 .hint{display:block;margin-top:10px;font-size:11px;color:#aaa;line-height:1.5}
+.notice{display:block;margin-top:14px;padding-top:10px;border-top:1px dashed #e5e5e5;font-size:11px;color:#888;line-height:1.5}
 #tMessage,#tHint{white-space:pre-line}
 #errorText{min-height:120px;user-select:none;-webkit-user-select:none;touch-action:pan-y}
 #errorText.loading{visibility:hidden}
-#records{display:none;max-width:900px;margin:55px auto;padding:0 20px}
+#records{display:none;max-width:1000px;margin:55px auto;padding:0 20px}
 #records h2{font-size:21px;font-weight:600}
 .sub{font-size:16px;font-weight:600;margin:40px 0 6px}
 .note{font-size:12px;color:#777;margin:8px 0 18px}
@@ -24,77 +26,90 @@ table{width:100%;border-collapse:collapse;font-size:13px;text-align:left}
 th,td{padding:11px 9px;border-bottom:1px solid #eee;white-space:nowrap}
 th{color:#777;font-weight:600}
 button{border:1px solid #ddd;background:#fff;border-radius:5px;padding:7px 10px;font-size:12px;cursor:pointer}
+button:disabled{opacity:.5;cursor:wait}
 .head{display:flex;justify-content:space-between;align-items:center;gap:10px}
 .actions{display:flex;gap:8px;flex-wrap:wrap}
 #login{display:none;max-width:320px}
 #login input{display:block;width:100%;padding:9px 10px;margin:0 0 10px;border:1px solid #ddd;border-radius:5px;font-size:13px}
 #loginMsg{font-size:12px;color:#c33;min-height:16px;margin:0 0 10px}
-#editor{max-width:560px}
-#editor label{display:block;font-size:12px;color:#777;margin:0 0 4px}
-#editor input,#editor textarea{display:block;width:100%;padding:9px 10px;margin:0 0 14px;border:1px solid #ddd;border-radius:5px;font-size:13px;font-family:inherit}
-#editor textarea{min-height:64px;resize:vertical}
+#editor{max-width:700px}
+.editor-grid{display:grid;grid-template-columns:1fr 1fr;gap:0 14px}
+.editor-field label{display:block;font-size:12px;color:#777;margin:0 0 4px}
+.editor-field input,.editor-field textarea{display:block;width:100%;padding:9px 10px;margin:0 0 14px;border:1px solid #ddd;border-radius:5px;font-size:13px;font-family:inherit}
+.editor-field textarea{min-height:64px;resize:vertical}
 #editMsg{font-size:12px;color:#2a7;min-height:16px;margin:10px 0 0}
 .changed{color:#c33;font-weight:600}
 .same{color:#aaa}
-@media(max-width:600px){main{margin-top:15vh}h1{font-size:27px}#records{margin-top:30px}}
+@media(max-width:600px){
+main{margin-top:15vh}
+h1{font-size:27px}
+#records{margin-top:30px}
+.editor-grid{grid-template-columns:1fr}
+}
 </style>
 </head>
 <body>
+
 <main id="error">
   <div id="errorText" class="loading">
-    <h1 id="tHeading">404 Not Found</h1>
-    <p id="tMessage">The requested URL was not found on this server.</p>
+    <h1 id="tHeading"></h1>
+    <p id="tMessage"></p>
     <hr>
-    <small id="tCode">HTTP ERROR 404</small>
-    <small class="hint" id="tHint">이 페이지는 관리자 로그인이 된 기기의 접속 기록만 남기며, 오류 문구를 1초 이상 길게 누르면 기록을 확인할 수 있습니다.</small>
+    <small id="tCode"></small>
+    <small class="hint" id="tHint"></small>
+    <small class="notice" id="tNotice"></small>
   </div>
 </main>
 
 <section id="records">
   <div class="head">
-    <h2>접속 기록</h2>
-    <button id="backBtn">돌아가기</button>
+    <h2 id="recordsTitle"></h2>
+    <button id="backBtn"></button>
   </div>
 
   <div id="login">
-    <p class="note">관리자 계정으로 로그인하세요. 로그인한 기기는 이후 접속할 때마다 자동으로 기록됩니다.</p>
-    <input id="email" type="email" placeholder="이메일" autocomplete="username">
-    <input id="password" type="password" placeholder="비밀번호" autocomplete="current-password">
+    <p class="note" id="loginNote"></p>
+    <input id="email" type="email" autocomplete="username">
+    <input id="password" type="password" autocomplete="current-password">
     <p id="loginMsg"></p>
-    <button id="loginBtn">로그인</button>
+    <button id="loginBtn"></button>
   </div>
 
   <div id="list" style="display:none">
-    <p class="note">실제 IP 기록입니다. 관리자 로그인이 된 기기의 접속만 저장되며, 관리자만 볼 수 있습니다.</p>
+    <p class="note" id="recordsNote"></p>
     <div style="overflow:auto">
       <table>
-        <thead><tr><th>#</th><th>접속 시간</th><th>IP</th><th>IP 변경 (같은 기기 기준)</th><th>기기</th><th>세션</th></tr></thead>
+        <thead>
+          <tr>
+            <th id="thNumber"></th>
+            <th id="thTime"></th>
+            <th id="thType"></th>
+            <th id="thIp"></th>
+            <th id="thIpChange"></th>
+            <th id="thDevice"></th>
+            <th id="thSession"></th>
+          </tr>
+        </thead>
         <tbody id="rows"></tbody>
       </table>
     </div>
+
     <p class="note" id="count"></p>
+
     <div class="actions">
-      <button id="refreshBtn">새로고침</button>
-      <button id="clearBtn">기록 초기화</button>
-      <button id="logoutBtn">로그아웃</button>
+      <button id="refreshBtn"></button>
+      <button id="clearBtn"></button>
+      <button id="logoutBtn"></button>
     </div>
 
-    <h3 class="sub">화면 문구 편집</h3>
-    <p class="note">첫 화면(404 화면)에 보이는 글자를 바꿉니다. 저장하면 모든 방문자에게 바로 적용됩니다.</p>
+    <h3 class="sub" id="editorTitle"></h3>
+    <p class="note" id="editorNote"></p>
+
     <div id="editor">
-      <label for="eTitle">브라우저 탭 제목</label>
-      <input id="eTitle">
-      <label for="eHeading">큰 제목</label>
-      <input id="eHeading">
-      <label for="eMessage">본문 (Enter로 줄바꿈 가능)</label>
-      <textarea id="eMessage"></textarea>
-      <label for="eCode">작은 글씨</label>
-      <input id="eCode">
-      <label for="eHint">안내 문구 (Enter로 줄바꿈 가능)</label>
-      <textarea id="eHint"></textarea>
+      <div class="editor-grid" id="editorFields"></div>
       <div class="actions">
-        <button id="saveTextBtn">저장</button>
-        <button id="resetTextBtn">기본값으로 채우기</button>
+        <button id="saveTextBtn"></button>
+        <button id="resetTextBtn"></button>
       </div>
       <p id="editMsg"></p>
     </div>
@@ -103,8 +118,33 @@ button{border:1px solid #ddd;background:#fff;border-radius:5px;padding:7px 10px;
 
 <script type="module">
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
-import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
-import { getFirestore, collection, doc, addDoc, getDoc, setDoc, getDocs, query, orderBy, limit, serverTimestamp, writeBatch } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+
+import {
+  getAuth,
+  onAuthStateChanged,
+  signInWithEmailAndPassword,
+  signOut
+} from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+
+import {
+  getFirestore,
+  collection,
+  doc,
+  addDoc,
+  getDoc,
+  setDoc,
+  getDocs,
+  query,
+  orderBy,
+  limit,
+  serverTimestamp,
+  writeBatch
+} from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+
+
+/* =====================================
+   FIREBASE 설정
+===================================== */
 
 const firebaseConfig = {
   apiKey: "AIzaSyBzjWvdrHiFoOjsW7kKYk9CHhPCB9L93eg",
@@ -118,190 +158,779 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
+
 const visits = collection(db, 'visits');
 const textsRef = doc(db, 'settings', 'texts');
+
 const $ = id => document.getElementById(id);
 
 let currentUser = null;
-let logged = false; // 이번에 페이지를 열었을 때 이미 기록했는지
+let logged = false;
 
-/* ---------- 화면 문구 ---------- */
+
+/* =====================================
+   전체 편집 가능 문구
+===================================== */
+
 const DEFAULT_TEXTS = {
+
+  // 첫 화면
   title: '404 Not Found',
   heading: '404 Not Found',
   message: 'The requested URL was not found on this server.',
   code: 'HTTP ERROR 404',
-  hint: '이 페이지는 관리자 로그인이 된 기기의 접속 기록만 남기며, 오류 문구를 1초 이상 길게 누르면 기록을 확인할 수 있습니다.'
+  hint: '오류 문구를 1초 이상 길게 누르면 기록을 확인할 수 있습니다.',
+  notice: '이 페이지는 접속 시 IP 주소, 접속 시간, 기기 종류를 기록합니다. 기록은 관리자만 볼 수 있습니다.',
+
+  // 접속 기록
+  recordsTitle: '접속 기록',
+  back: '돌아가기',
+
+  // 로그인
+  loginNote: '관리자 계정으로 로그인하세요.',
+  emailPlaceholder: '이메일',
+  passwordPlaceholder: '비밀번호',
+  login: '로그인',
+
+  // 기록 설명
+  recordsNote: '실제 IP 기록입니다. 링크로 들어온 모든 방문자의 접속이 저장되며, 관리자만 볼 수 있습니다.',
+
+  // 표 제목
+  colNumber: '#',
+  colTime: '접속 시간',
+  colType: '구분',
+  colIp: 'IP',
+  colIpChange: 'IP 변경 (같은 기기 기준)',
+  colDevice: '기기',
+  colSession: '세션',
+
+  // 버튼
+  refresh: '새로고침',
+  clear: '기록 초기화',
+  logout: '로그아웃',
+
+  // 편집기
+  editorTitle: '화면 문구 편집',
+  editorNote: '아래 항목을 수정하고 저장하면 모든 방문자에게 적용됩니다. 줄바꿈이 가능한 항목은 여러 줄로 입력할 수 있습니다.',
+  save: '저장',
+  reset: '기본값으로 채우기',
+
+  // 상태 문구
+  loginFailed: '로그인 실패: 이메일 또는 비밀번호를 확인하세요.',
+  loading: '불러오는 중…',
+  firstRecord: '첫 기록',
+  changed: '변경됨',
+  previous: '이전',
+  same: '같음',
+  admin: '관리자',
+  visitor: '방문자',
+  noRecords: '기록 없음',
+
+  // 동적 문구
+  countTemplate: '총 {count}건 · 최근 300건까지 표시',
+  loadFailed: '불러오기 실패: {error}',
+  confirmClear: '모든 접속 기록을 삭제할까요? 되돌릴 수 없습니다.',
+  deleteFailed: '삭제 실패: {error}',
+  saving: '저장 중…',
+  saved: '저장됐어요. 돌아가기를 누르면 바뀐 화면을 볼 수 있어요.',
+  saveFailed: '저장 실패: {error}',
+  resetFilled: '기본값으로 채웠어요. 저장을 눌러야 적용됩니다.',
+
+  // 편집기 항목 이름
+  labelTitle: '브라우저 탭 제목',
+  labelHeading: '큰 제목',
+  labelMessage: '본문',
+  labelCode: '작은 글씨',
+  labelHint: '안내 문구',
+  labelNotice: '하단 기록 안내 문구',
+  labelRecordsTitle: '접속 기록 제목',
+  labelBack: '돌아가기 버튼',
+  labelLoginNote: '로그인 안내',
+  labelEmail: '이메일 입력칸 안내',
+  labelPassword: '비밀번호 입력칸 안내',
+  labelLogin: '로그인 버튼',
+  labelRecordsNote: '접속 기록 설명',
+  labelColNumber: '표 제목: 번호',
+  labelColTime: '표 제목: 접속 시간',
+  labelColType: '표 제목: 구분',
+  labelColIp: '표 제목: IP',
+  labelColIpChange: '표 제목: IP 변경',
+  labelColDevice: '표 제목: 기기',
+  labelColSession: '표 제목: 세션',
+  labelRefresh: '새로고침 버튼',
+  labelClear: '기록 초기화 버튼',
+  labelLogout: '로그아웃 버튼',
+  labelEditorTitle: '편집 영역 제목',
+  labelEditorNote: '편집 영역 설명',
+  labelSave: '저장 버튼',
+  labelReset: '기본값 버튼',
+  labelLoginFailed: '로그인 실패 문구',
+  labelLoading: '불러오는 중 문구',
+  labelFirstRecord: '첫 기록 문구',
+  labelChanged: 'IP 변경 표시',
+  labelPrevious: '이전 IP 표시 앞 문구',
+  labelSame: '동일 IP 표시',
+  labelAdmin: '관리자 구분',
+  labelVisitor: '방문자 구분',
+  labelNoRecords: '기록 없음 문구',
+  labelCountTemplate: '접속 건수 문구 ({count} 사용)',
+  labelLoadFailed: '기록 불러오기 실패 문구 ({error} 사용)',
+  labelConfirmClear: '기록 초기화 확인창',
+  labelDeleteFailed: '기록 삭제 실패 문구 ({error} 사용)',
+  labelSaving: '저장 중 문구',
+  labelSaved: '저장 완료 문구',
+  labelSaveFailed: '문구 저장 실패 문구 ({error} 사용)',
+  labelResetFilled: '기본값 적용 안내'
 };
+
+
+/* =====================================
+   편집기 항목 구성
+===================================== */
+
+const FIELD_GROUPS = [
+
+  ['title','labelTitle'],
+  ['heading','labelHeading'],
+  ['message','labelMessage'],
+  ['code','labelCode'],
+  ['hint','labelHint'],
+  ['notice','labelNotice'],
+
+  ['recordsTitle','labelRecordsTitle'],
+  ['back','labelBack'],
+
+  ['loginNote','labelLoginNote'],
+  ['emailPlaceholder','labelEmail'],
+  ['passwordPlaceholder','labelPassword'],
+  ['login','labelLogin'],
+
+  ['recordsNote','labelRecordsNote'],
+
+  ['colNumber','labelColNumber'],
+  ['colTime','labelColTime'],
+  ['colType','labelColType'],
+  ['colIp','labelColIp'],
+  ['colIpChange','labelColIpChange'],
+  ['colDevice','labelColDevice'],
+  ['colSession','labelColSession'],
+
+  ['refresh','labelRefresh'],
+  ['clear','labelClear'],
+  ['logout','labelLogout'],
+
+  ['editorTitle','labelEditorTitle'],
+  ['editorNote','labelEditorNote'],
+  ['save','labelSave'],
+  ['reset','labelReset'],
+
+  ['loginFailed','labelLoginFailed'],
+  ['loading','labelLoading'],
+  ['firstRecord','labelFirstRecord'],
+  ['changed','labelChanged'],
+  ['previous','labelPrevious'],
+  ['same','labelSame'],
+  ['admin','labelAdmin'],
+  ['visitor','labelVisitor'],
+  ['noRecords','labelNoRecords'],
+
+  ['countTemplate','labelCountTemplate'],
+  ['loadFailed','labelLoadFailed'],
+  ['confirmClear','labelConfirmClear'],
+  ['deleteFailed','labelDeleteFailed'],
+  ['saving','labelSaving'],
+  ['saved','labelSaved'],
+  ['saveFailed','labelSaveFailed'],
+  ['resetFilled','labelResetFilled']
+];
+
 const TEXT_KEY = 'page_texts_cache';
-let texts = { ...DEFAULT_TEXTS };
+
+let texts = {...DEFAULT_TEXTS};
+
+
+/* =====================================
+   화면 문구 적용
+===================================== */
 
 function applyTexts(t){
-  texts = { ...DEFAULT_TEXTS, ...t };
+
+  texts = {...DEFAULT_TEXTS, ...t};
+
   document.title = texts.title || ' ';
-  $('tHeading').textContent = texts.heading;
-  $('tMessage').textContent = texts.message;
-  $('tCode').textContent = texts.code;
-  $('tHint').textContent = texts.hint;
+
+  const map = {
+
+    tHeading: 'heading',
+    tMessage: 'message',
+    tCode: 'code',
+    tHint: 'hint',
+    tNotice: 'notice',
+
+    recordsTitle: 'recordsTitle',
+    backBtn: 'back',
+
+    loginNote: 'loginNote',
+    loginBtn: 'login',
+
+    recordsNote: 'recordsNote',
+
+    thNumber: 'colNumber',
+    thTime: 'colTime',
+    thType: 'colType',
+    thIp: 'colIp',
+    thIpChange: 'colIpChange',
+    thDevice: 'colDevice',
+    thSession: 'colSession',
+
+    refreshBtn: 'refresh',
+    clearBtn: 'clear',
+    logoutBtn: 'logout',
+
+    editorTitle: 'editorTitle',
+    editorNote: 'editorNote',
+    saveTextBtn: 'save',
+    resetTextBtn: 'reset'
+  };
+
+  for(const [id,key] of Object.entries(map)){
+    $(id).textContent = texts[key];
+  }
+
+  $('email').placeholder = texts.emailPlaceholder;
+  $('password').placeholder = texts.passwordPlaceholder;
+
+  if(currentUser) fillEditor(texts);
 }
-function showErrorText(){ $('errorText').classList.remove('loading'); }
+
+
+/* =====================================
+   문구 불러오기
+===================================== */
+
+function showErrorText(){
+  $('errorText').classList.remove('loading');
+}
 
 async function loadTexts(){
+
   let cached = null;
-  try{ cached = JSON.parse(localStorage.getItem(TEXT_KEY)); }catch{}
-  if(cached){ applyTexts(cached); showErrorText(); }
-  const fallback = setTimeout(showErrorText, 1500); // 느릴 때 기본 문구라도 보여주기
+
   try{
+    cached = JSON.parse(localStorage.getItem(TEXT_KEY));
+  }catch{}
+
+  if(cached){
+    applyTexts(cached);
+    showErrorText();
+  }
+
+  const fallback = setTimeout(showErrorText,1500);
+
+  try{
+
     const snap = await getDoc(textsRef);
+
     if(snap.exists()){
+
       applyTexts(snap.data());
-      try{ localStorage.setItem(TEXT_KEY, JSON.stringify(texts)); }catch{}
+
+      try{
+        localStorage.setItem(TEXT_KEY,JSON.stringify(texts));
+      }catch{}
     }
-  }catch(e){ console.error('문구 불러오기 실패', e); }
+
+  }catch(e){
+
+    console.error('문구 불러오기 실패',e);
+
+  }
+
   clearTimeout(fallback);
   showErrorText();
 }
 
-function fillEditor(t){
-  $('eTitle').value = t.title;
-  $('eHeading').value = t.heading;
-  $('eMessage').value = t.message;
-  $('eCode').value = t.code;
-  $('eHint').value = t.hint;
-}
 
-async function saveTexts(){
-  const t = {
-    title: $('eTitle').value,
-    heading: $('eHeading').value,
-    message: $('eMessage').value,
-    code: $('eCode').value,
-    hint: $('eHint').value
-  };
-  $('editMsg').style.color = '#2a7';
-  $('editMsg').textContent = '저장 중…';
-  try{
-    await setDoc(textsRef, t);
-    applyTexts(t);
-    try{ localStorage.setItem(TEXT_KEY, JSON.stringify(texts)); }catch{}
-    $('editMsg').textContent = '저장됐어요. 돌아가기를 누르면 바뀐 화면을 볼 수 있어요.';
-  }catch(e){
-    $('editMsg').style.color = '#c33';
-    $('editMsg').textContent = '저장 실패: ' + (e.code || e.message);
+/* =====================================
+   편집기 생성
+===================================== */
+
+function buildEditor(){
+
+  $('editorFields').innerHTML = FIELD_GROUPS.map(([key])=>{
+
+    const multi = [
+      'message',
+      'hint',
+      'notice',
+      'recordsNote',
+      'editorNote',
+      'loginNote'
+    ].includes(key);
+
+    const tag = multi ? 'textarea' : 'input';
+
+    return `
+      <div class="editor-field">
+        <label for="field_${key}" id="label_${key}"></label>
+        <${tag} id="field_${key}" data-text-key="${key}"></${tag}>
+      </div>
+    `;
+
+  }).join('');
+
+  for(const [key,labelKey] of FIELD_GROUPS){
+
+    $('label_'+key).textContent = texts[labelKey];
+
   }
 }
 
-/* ---------- 접속 기록 ---------- */
+function fillEditor(t){
+
+  buildEditor();
+
+  for(const [key] of FIELD_GROUPS){
+
+    const el = $('field_'+key);
+
+    if(el){
+      el.value = t[key] ?? '';
+    }
+  }
+}
+
+
+/* =====================================
+   문구 저장
+===================================== */
+
+async function saveTexts(){
+
+  const t = {};
+
+  for(const [key] of FIELD_GROUPS){
+
+    t[key] = $('field_'+key).value;
+
+  }
+
+  $('editMsg').style.color = '#2a7';
+  $('editMsg').textContent = texts.saving;
+
+  try{
+
+    await setDoc(textsRef,t);
+
+    applyTexts(t);
+
+    try{
+      localStorage.setItem(TEXT_KEY,JSON.stringify(texts));
+    }catch{}
+
+    $('editMsg').textContent = texts.saved;
+
+  }catch(e){
+
+    $('editMsg').style.color = '#c33';
+
+    $('editMsg').textContent =
+      texts.saveFailed.replace('{error}',e.code || e.message);
+
+  }
+}
+
+
+/* =====================================
+   접속 정보
+===================================== */
+
 function getSession(){
+
   let s = sessionStorage.getItem('visit_session');
-  if(!s){ s = 'S-' + Math.random().toString(36).slice(2,7).toUpperCase(); sessionStorage.setItem('visit_session', s); }
+
+  if(!s){
+
+    s = 'S-' + Math.random().toString(36).slice(2,7).toUpperCase();
+
+    sessionStorage.setItem('visit_session',s);
+
+  }
+
   return s;
 }
 
+
 function getDevice(){
+
   const ua = navigator.userAgent;
-  const os = /Android/i.test(ua) ? 'Android' : /iPhone|iPad/i.test(ua) ? 'iOS' : /Windows/i.test(ua) ? 'Windows' : /Mac/i.test(ua) ? 'Mac' : '기타';
-  const br = /SamsungBrowser/i.test(ua) ? 'Samsung' : /Edg\//i.test(ua) ? 'Edge' : /Whale/i.test(ua) ? 'Whale' : /Chrome/i.test(ua) ? 'Chrome' : /Safari/i.test(ua) ? 'Safari' : /Firefox/i.test(ua) ? 'Firefox' : '기타';
+
+  const os =
+    /Android/i.test(ua) ? 'Android' :
+    /iPhone|iPad/i.test(ua) ? 'iOS' :
+    /Windows/i.test(ua) ? 'Windows' :
+    /Mac/i.test(ua) ? 'Mac' : '기타';
+
+  const br =
+    /SamsungBrowser/i.test(ua) ? 'Samsung' :
+    /Edg\//i.test(ua) ? 'Edge' :
+    /Whale/i.test(ua) ? 'Whale' :
+    /Chrome/i.test(ua) ? 'Chrome' :
+    /Safari/i.test(ua) ? 'Safari' :
+    /Firefox/i.test(ua) ? 'Firefox' : '기타';
+
   return os + ' · ' + br;
 }
 
+
 async function getIP(){
+
   try{
-    const r = await fetch('https://api.ipify.org?format=json', {cache:'no-store'});
+
+    const r = await fetch(
+      'https://api.ipify.org?format=json',
+      {cache:'no-store'}
+    );
+
     const j = await r.json();
+
     return j.ip || '확인 실패';
-  }catch{ return '확인 실패'; }
+
+  }catch{
+
+    return '확인 실패';
+
+  }
 }
+
 
 async function addLog(){
-  if(!currentUser || logged) return;
+
+  if(logged) return;
+
   logged = true;
+
   try{
+
     const ip = await getIP();
-    await addDoc(visits, { time: serverTimestamp(), ip, session: getSession(), device: getDevice() });
-  }catch(e){ console.error('기록 실패', e); logged = false; }
+
+    await addDoc(visits,{
+
+      time: serverTimestamp(),
+      ip,
+      session: getSession(),
+      device: getDevice(),
+      who: currentUser ? 'admin' : 'visitor'
+
+    });
+
+  }catch(e){
+
+    console.error('기록 실패',e);
+
+  }
 }
 
-function esc(s){ return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
-function fmt(ts){ return ts ? ts.toDate().toLocaleString('ko-KR', {hour12:false}) : '-'; }
+
+/* =====================================
+   접속 기록 표시
+===================================== */
+
+function esc(s){
+
+  return String(s ?? '').replace(/[&<>"']/g,c=>({
+
+    '&':'&amp;',
+    '<':'&lt;',
+    '>':'&gt;',
+    '"':'&quot;',
+    "'":'&#39;'
+
+  }[c]));
+
+}
+
+function fmt(ts){
+
+  return ts
+    ? ts.toDate().toLocaleString('ko-KR',{hour12:false})
+    : '-';
+
+}
+
 
 async function render(){
-  $('rows').innerHTML = '<tr><td colspan="6">불러오는 중…</td></tr>';
+
+  $('rows').innerHTML =
+    `<tr><td colspan="7">${esc(texts.loading)}</td></tr>`;
+
   try{
-    const snap = await getDocs(query(visits, orderBy('time','desc'), limit(300)));
-    const logs = snap.docs.map(d => d.data());
-    $('rows').innerHTML = logs.map((x,i) => {
-      const prev = logs.slice(i+1).find(y => y.device === x.device);
+
+    const snap = await getDocs(
+      query(visits,orderBy('time','desc'),limit(300))
+    );
+
+    const logs = snap.docs.map(d=>d.data());
+
+    $('rows').innerHTML = logs.map((x,i)=>{
+
+      const prev = logs.slice(i+1).find(
+        y=>y.device === x.device
+      );
+
       let change;
-      if(!prev) change = '<span class="same">첫 기록</span>';
-      else if(prev.ip !== x.ip) change = `<span class="changed">변경됨</span> <span class="same">(이전 ${esc(prev.ip)})</span>`;
-      else change = '<span class="same">같음</span>';
-      return `<tr><td>${logs.length-i}</td><td>${fmt(x.time)}</td><td>${esc(x.ip)}</td><td>${change}</td><td>${esc(x.device)}</td><td>${esc(x.session)}</td></tr>`;
-    }).join('') || '<tr><td colspan="6">기록 없음</td></tr>';
-    $('count').textContent = '총 ' + logs.length + '건 · 최근 300건까지 표시';
+
+      if(!prev){
+
+        change =
+          `<span class="same">${esc(texts.firstRecord)}</span>`;
+
+      }else if(prev.ip !== x.ip){
+
+        change =
+          `<span class="changed">${esc(texts.changed)}</span>
+          <span class="same">(${esc(texts.previous)} ${esc(prev.ip)})</span>`;
+
+      }else{
+
+        change =
+          `<span class="same">${esc(texts.same)}</span>`;
+
+      }
+
+      const who =
+        x.who === 'admin' ? texts.admin :
+        x.who === 'visitor' ? texts.visitor : '-';
+
+      return `
+        <tr>
+          <td>${logs.length-i}</td>
+          <td>${fmt(x.time)}</td>
+          <td>${esc(who)}</td>
+          <td>${esc(x.ip)}</td>
+          <td>${change}</td>
+          <td>${esc(x.device)}</td>
+          <td>${esc(x.session)}</td>
+        </tr>
+      `;
+
+    }).join('') ||
+      `<tr><td colspan="7">${esc(texts.noRecords)}</td></tr>`;
+
+    $('count').textContent =
+      texts.countTemplate.replace('{count}',logs.length);
+
   }catch(e){
-    $('rows').innerHTML = '<tr><td colspan="6">불러오기 실패: ' + esc(e.code || e.message) + '</td></tr>';
+
+    $('rows').innerHTML = `
+      <tr>
+        <td colspan="7">
+          ${esc(texts.loadFailed.replace('{error}',e.code || e.message))}
+        </td>
+      </tr>
+    `;
+
   }
+
 }
+
+
+/* =====================================
+   화면 전환
+===================================== */
 
 function updateView(){
+
   if(currentUser){
-    $('login').style.display='none'; $('list').style.display='block';
-    fillEditor(texts); $('editMsg').textContent = '';
+
+    $('login').style.display = 'none';
+    $('list').style.display = 'block';
+
+    fillEditor(texts);
+
+    $('editMsg').textContent = '';
+
     render();
+
   }else{
-    $('list').style.display='none'; $('login').style.display='block';
+
+    $('list').style.display = 'none';
+    $('login').style.display = 'block';
+
   }
+
 }
-function showRecords(){ $('error').style.display='none'; $('records').style.display='block'; updateView(); }
-function backTo404(){ $('records').style.display='none'; $('error').style.display='block'; }
+
+function showRecords(){
+
+  $('error').style.display = 'none';
+  $('records').style.display = 'block';
+
+  updateView();
+
+}
+
+function backTo404(){
+
+  $('records').style.display = 'none';
+  $('error').style.display = 'block';
+
+}
+
+
+/* =====================================
+   기록 초기화
+===================================== */
 
 async function clearData(){
-  if(!confirm('모든 접속 기록을 삭제할까요? 되돌릴 수 없습니다.')) return;
+
+  if(!confirm(texts.confirmClear)) return;
+
   try{
+
     while(true){
-      const snap = await getDocs(query(visits, limit(400)));
+
+      const snap = await getDocs(
+        query(visits,limit(400))
+      );
+
       if(snap.empty) break;
+
       const batch = writeBatch(db);
-      snap.docs.forEach(d => batch.delete(d.ref));
+
+      snap.docs.forEach(d=>batch.delete(d.ref));
+
       await batch.commit();
+
     }
+
     render();
-  }catch(e){ alert('삭제 실패: ' + (e.code || e.message)); }
+
+  }catch(e){
+
+    alert(
+      texts.deleteFailed.replace('{error}',e.code || e.message)
+    );
+
+  }
+
 }
+
+
+/* =====================================
+   로그인 / 로그아웃
+===================================== */
 
 async function login(){
+
   $('loginMsg').textContent = '';
+
   try{
-    await signInWithEmailAndPassword(auth, $('email').value.trim(), $('password').value);
+
+    await signInWithEmailAndPassword(
+      auth,
+      $('email').value.trim(),
+      $('password').value
+    );
+
     $('password').value = '';
-  }catch(e){ $('loginMsg').textContent = '로그인 실패: 이메일 또는 비밀번호를 확인하세요.'; }
+
+  }catch(e){
+
+    $('loginMsg').textContent = texts.loginFailed;
+
+  }
+
 }
 
-async function logout(){ await signOut(auth); logged = false; }
+async function logout(){
 
-onAuthStateChanged(auth, async user => {
+  await signOut(auth);
+
+}
+
+
+/* =====================================
+   Firebase 인증 상태
+===================================== */
+
+onAuthStateChanged(auth,async user=>{
+
   currentUser = user;
-  if(user) await addLog();
-  if($('records').style.display === 'block') updateView();
+
+  addLog();
+
+  if($('records').style.display === 'block'){
+
+    updateView();
+
+  }
+
 });
 
-$('backBtn').addEventListener('click', backTo404);
-$('loginBtn').addEventListener('click', login);
-$('password').addEventListener('keydown', e => { if(e.key === 'Enter') login(); });
-$('refreshBtn').addEventListener('click', render);
-$('clearBtn').addEventListener('click', clearData);
-$('logoutBtn').addEventListener('click', logout);
-$('saveTextBtn').addEventListener('click', saveTexts);
-$('resetTextBtn').addEventListener('click', () => { fillEditor(DEFAULT_TEXTS); $('editMsg').style.color = '#777'; $('editMsg').textContent = '기본값으로 채웠어요. 저장을 눌러야 적용됩니다.'; });
+
+/* =====================================
+   버튼 이벤트
+===================================== */
+
+$('backBtn').addEventListener('click',backTo404);
+
+$('loginBtn').addEventListener('click',login);
+
+$('password').addEventListener('keydown',e=>{
+
+  if(e.key === 'Enter') login();
+
+});
+
+$('refreshBtn').addEventListener('click',render);
+
+$('clearBtn').addEventListener('click',clearData);
+
+$('logoutBtn').addEventListener('click',logout);
+
+$('saveTextBtn').addEventListener('click',saveTexts);
+
+$('resetTextBtn').addEventListener('click',()=>{
+
+  fillEditor(DEFAULT_TEXTS);
+
+  $('editMsg').style.color = '#777';
+
+  $('editMsg').textContent = texts.resetFilled;
+
+});
+
+
+/* =====================================
+   404 화면 길게 누르기
+===================================== */
 
 let timer;
+
 const target = $('errorText');
-target.addEventListener('pointerdown', () => { timer = setTimeout(showRecords, 1000); });
-['pointerup','pointerleave','pointercancel'].forEach(ev => target.addEventListener(ev, () => clearTimeout(timer)));
-target.addEventListener('contextmenu', e => e.preventDefault());
+
+target.addEventListener('pointerdown',()=>{
+
+  timer = setTimeout(showRecords,1000);
+
+});
+
+['pointerup','pointerleave','pointercancel'].forEach(ev=>{
+
+  target.addEventListener(ev,()=>clearTimeout(timer));
+
+});
+
+target.addEventListener('contextmenu',e=>e.preventDefault());
+
+
+/* =====================================
+   시작
+===================================== */
 
 loadTexts();
+
 </script>
 </body>
 </html>
