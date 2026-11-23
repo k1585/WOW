@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>404 Not Found</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#fff;color:#222;font-family:Arial,Helvetica,sans-serif}
+main{max-width:640px;margin:18vh auto 0;padding:0 28px}
+h1{font-size:30px;font-weight:600;margin:0 0 18px}
+p{font-size:14px;line-height:1.65;color:#555;margin:0 0 12px}
+hr{border:0;border-top:1px solid #ddd;margin:25px 0 14px}
+small{font-size:12px;color:#888}
+#errorText{user-select:none;-webkit-user-select:none;touch-action:pan-y}
+#records{display:none;max-width:900px;margin:55px auto;padding:0 20px}
+#records h2{font-size:21px;font-weight:600}
+.note{font-size:12px;color:#777;margin:8px 0 18px}
+table{width:100%;border-collapse:collapse;font-size:13px;text-align:left}
+th,td{padding:11px 9px;border-bottom:1px solid #eee}
+th{color:#777;font-weight:600}
+button{border:1px solid #ddd;background:#fff;border-radius:5px;padding:7px 10px;font-size:12px;cursor:pointer}
+.head{display:flex;justify-content:space-between;align-items:center;gap:10px}
+@media(max-width:600px){main{margin-top:15vh}h1{font-size:27px}#records{margin-top:30px}}
+</style>
+</head>
+<body>
+<main id="error">
+  <div id="errorText">
+    <h1>404 Not Found</h1>
+    <p>The requested URL was not found on this server.</p>
+    <hr>
+    <small>HTTP ERROR 404</small>
+  </div>
+</main>
+
+<section id="records">
+  <div class="head">
+    <h2>접속 기록</h2>
+    <button onclick="backTo404()">돌아가기</button>
+  </div>
+  <p class="note">프로토타입 예시 데이터입니다. 실제 IP는 수집하지 않으며, 가상 주소만 이 브라우저에 저장됩니다.</p>
+  <div style="overflow:auto">
+    <table>
+      <thead><tr><th>#</th><th>접속 시간</th><th>가상 IP</th><th>세션</th></tr></thead>
+      <tbody id="rows"></tbody>
+    </table>
+  </div>
+  <p class="note" id="count"></p>
+  <button onclick="clearData()">기록 초기화</button>
+</section>
+
+<script>
+const KEY='simple_404_demo_log';
+const pool=['192.0.2.18','198.51.100.42','203.0.113.76','192.0.2.103','198.51.100.211'];
+function getLogs(){try{return JSON.parse(localStorage.getItem(KEY)||'[]')}catch{return []}}
+function addLog(){
+ const logs=getLogs();
+ let session=sessionStorage.getItem('demo_session');
+ if(!session){session='DEMO-'+Math.random().toString(36).slice(2,7).toUpperCase();sessionStorage.setItem('demo_session',session)}
+ logs.unshift({time:new Date().toLocaleString('ko-KR',{hour12:false}),ip:pool[Math.floor(Math.random()*pool.length)],session});
+ localStorage.setItem(KEY,JSON.stringify(logs.slice(0,300)));
+}
+function render(){
+ const logs=getLogs();
+ document.getElementById('rows').innerHTML=logs.map((x,i)=>`<tr><td>${logs.length-i}</td><td>${x.time}</td><td>${x.ip}</td><td>${x.session}</td></tr>`).join('')||'<tr><td colspan="4">기록 없음</td></tr>';
+ document.getElementById('count').textContent='총 '+logs.length+'건 · 가상 데이터';
+}
+function showRecords(){document.getElementById('error').style.display='none';document.getElementById('records').style.display='block';render()}
+function backTo404(){document.getElementById('records').style.display='none';document.getElementById('error').style.display='block'}
+function clearData(){if(confirm('데모 기록을 삭제할까요?')){localStorage.removeItem(KEY);render()}}
+addLog();
+
+let timer;
+const target=document.getElementById('errorText');
+target.addEventListener('pointerdown',e=>{timer=setTimeout(showRecords,1000)});
+['pointerup','pointerleave','pointercancel'].forEach(ev=>target.addEventListener(ev,()=>clearTimeout(timer)));
+target.addEventListener('contextmenu',e=>e.preventDefault());
+</script>
+</body>
+</html>
